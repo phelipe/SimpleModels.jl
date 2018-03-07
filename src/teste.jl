@@ -6,44 +6,18 @@ using StaticArrays
 using DifferentialEquations
 pyplot()
 
-type InputRobot{T} <: DEDataVector{T}
-    x::Array{T,1}
-    tau::Array{T,1}
-end
 
-robot = Dof2([23.902, 1.285], [.45, .45], [0.091, 0.048], [1.266, 0.093])
-model = dinamic(robot)
+#robot = Dof2([23.902, 1.285], [.45, .45], [0.091, 0.048], [1.266, 0.093])
+#model = dinamic(robot)
 
 Ts = 0.005
 tend = 2.0
 t0 = 0.0
-x_0 = [0.,0.]
-v_0 = [0.,0.]
-x1,v1,a1,j1 = minimumjerkf(0.,0.,0.,0.,1.05,0.,0.,tend)
-x2,v2,a2,j2 = minimumjerkf(0.,0.,0.,0.,1.57,0.,0.,tend)
-kp = SMatrix{2,2}(diagm([7300.,600.]))
-kv = SMatrix{2,2}(diagm([700.,20.]))
+x1,v1,a1,j1 = minimumjerkf(0.,0.,0.,t0,1.05,0.,0.,tend)
+x2,v2,a2,j2 = minimumjerkf(0.,0.,0.,t0,1.57,0.,0.,tend)
+#kp = SMatrix{2,2}(diagm([3300.,400.]));kv = SMatrix{2,2}(diagm([200.,20.]))
+kp = SMatrix{2,2}(diagm([7000.,430.]));kv = SMatrix{2,2}(diagm([450.,30.]))
 
-function controlador(integrator)
-    data = user_cache(integrator)
-    data = data[length(data)]
-    #q = data.x[1:2]
-    #dotq = data.x[3:4]
-    xr = [x1(integrator.t), x2(integrator.t)]
-    vr = [v1(integrator.t), v2(integrator.t)]
-    #e = xr - q
-    #de = vr - dotq
-    #torque = (kp*e + kv*de)
-    #println(integrator.sol)
-    for c in user_cache(integrator)
-        q = c.x[1:2]
-        dotq = c.x[3:4]
-        e = xr - q
-        de = vr - dotq
-        torque = (kp*e + kv*de)
-        c.tau = torque
-    end
-end
 
 function myrobot(du, u, p, t)
     m=[23.902, 1.285]
@@ -82,8 +56,8 @@ function myrobot(du, u, p, t)
     vr = [v1(t), v2(t)]
     e = xr - θ
     de = vr - dθ
-    kp = SMatrix{2,2}(diagm([7300.,600.]))
-    kv = SMatrix{2,2}(diagm([700.,20.]))
+    #kp = SMatrix{2,2}(diagm([7300.,600.]))
+    #kv = SMatrix{2,2}(diagm([700.,20.]))
     tau = kp*e + kv*de
 
     du[1:2] = dθ
@@ -91,23 +65,94 @@ function myrobot(du, u, p, t)
 end
 
 
-cbs = PeriodicCallback(controlador,Ts)
-tspan = (t0,tend)
-start = InputRobot(vcat(x_0,v_0), zeros(2))
+#cbs = PeriodicCallback(controlador,Ts)
+#tspan = (t0,tend)
+#start = InputRobot(vcat(x_0,v_0), zeros(2))
 #prob = ODEProblem(model,start,tspan)
 #prob = ODEProblem(myrobot2,start,tspan)
 
-prob2 = ODEProblem(myrobot,[0.,0.,0.,0.],tspan)
-sol2 = solve(prob2,Tsit5(),saveat = 0.08)
+
 #sol = solve(prob,Tsit5(),saveat = 0.2,callback = cbs,force_dtmin=true)
 #sol = solve(prob,Tsit5(),callback = cbs)#,force_dtmin=true)#,reltol=1e-3,abstol=1e-6,,saveat = Ts/4
 #(x,v,t,a,ta,j,tj) = organize(robot,sol)
-(x,v,t,a,ta,j,tj) = organize(2,sol2)
-p1 = plot(j2,tj)
-p2 = plot(tj,j[2])
-plot(p1,p2)
 
-#(x,v,t,a,ta,j,tj) = organize(2,sol2)
-# plot(x1,t)
-# plot(t,x[1])
-#plot(p1,p2)
+tspan = (t0,tend)
+prob2 = ODEProblem(myrobot,[0.,0.,0.,0.],tspan)
+sol2 = solve(prob2,Tsit5(),saveat = 0.05)
+
+x,v,t,a,ta,j,tj = organize(2,sol2)
+
+xd1 = map(x->x1(x),t)
+xd2 = map(x->x2(x),t)
+vd1 = map(x->v1(x),t)
+vd2 = map(x->v2(x),t)
+ad1 = map(x->a1(x),ta)
+ad2 = map(x->a2(x),ta)
+jd1 = map(x->j1(x),tj)
+jd2 = map(x->j2(x),tj)
+
+function plotx()
+    p1 = plot(t,[xd1,x[1]], xlabel="tempo",ylabel="posição")
+    p2 = plot(t,[xd2,x[2]], xlabel="tempo",ylabel="posição")
+    plot(p1,p2, tittle="Posições")
+end
+
+function plotex()
+    p1 = plot(t,xd1 - x[1], xlabel="tempo",ylabel="erro posição")
+    p2 = plot(t,xd2 - x[2], xlabel="tempo",ylabel="erro posição")
+    plot(p1,p2, tittle="Posições")
+end
+
+function plotv()
+    p1 = plot(t,[vd1,v[1]], xlabel="tempo",ylabel="velocidade")
+    p2 = plot(t,[vd2,v[2]], xlabel="tempo",ylabel="velocidade")
+    plot(p1,p2, tittle="Velocidades")
+end
+
+function plotev()
+    p1 = plot(t,vd1 - v[1], xlabel="tempo",ylabel="erro velocidade")
+    p2 = plot(t,vd2 - v[2], xlabel="tempo",ylabel="erro velocidade")
+    plot(p1,p2, tittle="Velocidades")
+end
+
+function plota()
+    p1 = plot(t,[ad1,a[1]], xlabel="tempo",ylabel="aceleração")
+    p2 = plot(t,[ad2,a[2]], xlabel="tempo",ylabel="aceleração")
+    plot(p1,p2, tittle="Acelerações")
+end
+
+function plotea()
+    p1 = plot(t,ad1 - a[1], xlabel="tempo",ylabel="erro aceleração")
+    p2 = plot(t,ad2 - a[2], xlabel="tempo",ylabel="erro aceleração")
+    plot(p1,p2, tittle="Acelerações")
+end
+
+function plotj()
+    p1 = plot(t,[jd1,j[1]], xlabel="tempo",ylabel="tranco")
+    p2 = plot(t,[jd2,j[2]], xlabel="tempo",ylabel="tranco")
+    plot(p1,p2, tittle="Tranco")
+end
+
+function plotej()
+    p1 = plot(t,jd1 - j[1] , xlabel="tempo",ylabel="erro tranco")
+    p2 = plot(t,jd2 - j[2], xlabel="tempo",ylabel="erro tranco")
+    plot(p1,p2, tittle="Tranco")
+end
+
+function plotallx()
+    plot(plotx(),plotex())
+end
+
+function plotallv()
+    plot(plotv(),plotev())
+end
+
+function plotalla()
+    plot(plota(),plotea())
+end
+
+function plotallj()
+    plot(plotj(),plotej())
+end
+
+plotalla()

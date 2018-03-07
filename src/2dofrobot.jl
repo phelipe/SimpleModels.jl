@@ -53,6 +53,7 @@ end
 function organize(model::Dof2, data)
     out_x = map(x -> x[1:model.dof],data.u)
     out_dx = map(x -> x[(model.dof+1):end],data.u)
+    const T = diff(data.t)[1]
     #velocidade
     #Aqui estou fazendo uma aproximação da aceleração e do jerk
     #out_d2x = diff(out_dx)/Ts #aceleração
@@ -67,14 +68,14 @@ function organize(model::Dof2, data)
     end
     α = []
     for i=1:model.dof
-        push!(α, diff(ω[i])./diff(data.t)[1])
+        push!(α, diff(ω[i])./T)
     end
-    ta = collect(0:(data.t[end]/(length(α[1])-1)):data.t[end])
+    ta = data.t[1:length(α[1])]
     J = []
     for i=1:model.dof
-        push!(J, diff(α[i])./diff(ta)[1])
+        push!(J, diff(α[i])./T)
     end
-    tj = collect(0:(data.t[end]/(length(J[1])-1)):data.t[end])
+    tj = data.t[1:length(J[1])]
 
     θ, ω, data.t, α, ta, J, tj
 end
@@ -82,6 +83,7 @@ end
 function organize(mysize::Int, data)
     out_x = map(x -> x[1:mysize],data.u)
     out_dx = map(x -> x[(mysize+1):end],data.u)
+    const T = diff(data.t)[1]
     #velocidade
     #Aqui estou fazendo uma aproximação da aceleração e do jerk
     #out_d2x = diff(out_dx)/Ts #aceleração
@@ -96,14 +98,14 @@ function organize(mysize::Int, data)
     end
     α = []
     for i=1:mysize
-        push!(α, diff(ω[i])./diff(data.t)[1])
+        push!(α, diff(ω[i])./T)
     end
-    ta = collect(0:(data.t[end]/(length(α[1])-1)):data.t[end])
+    ta = data.t[1:length(α[1])]
     J = []
     for i=1:mysize
-        push!(J, diff(α[i])./diff(ta)[1])
+        push!(J, diff(α[i])./T)
     end
-    tj = collect(0:(data.t[end]/(length(J[1])-1)):data.t[end])
+    tj = data.t[1:length(J[1])]
 
     θ, ω, data.t, α, ta, J, tj
 end
