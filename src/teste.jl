@@ -56,25 +56,11 @@ function myrobot(du, u, p, t)
     vr = [v1(t), v2(t)]
     e = xr - θ
     de = vr - dθ
-    #kp = SMatrix{2,2}(diagm([7300.,600.]))
-    #kv = SMatrix{2,2}(diagm([700.,20.]))
     tau = kp*e + kv*de
 
     du[1:2] = dθ
     du[3:4] = inv(M)*(tau - C * dθ - G)
 end
-
-
-#cbs = PeriodicCallback(controlador,Ts)
-#tspan = (t0,tend)
-#start = InputRobot(vcat(x_0,v_0), zeros(2))
-#prob = ODEProblem(model,start,tspan)
-#prob = ODEProblem(myrobot2,start,tspan)
-
-
-#sol = solve(prob,Tsit5(),saveat = 0.2,callback = cbs,force_dtmin=true)
-#sol = solve(prob,Tsit5(),callback = cbs)#,force_dtmin=true)#,reltol=1e-3,abstol=1e-6,,saveat = Ts/4
-#(x,v,t,a,ta,j,tj) = organize(robot,sol)
 
 tspan = (t0,tend)
 prob2 = ODEProblem(myrobot,[0.,0.,0.,0.],tspan)
@@ -155,4 +141,4 @@ function plotallj()
     plot(plotj(),plotej())
 end
 
-plotalla()
+plotallx()
