@@ -143,4 +143,4 @@ end
 
 
 #gui()
-plotallv()
+#plotallv()
