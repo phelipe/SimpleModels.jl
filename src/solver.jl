@@ -1,12 +1,7 @@
-#Arquivo contendo  a função que será usada para rodar a simulação e retornar os melhores valores
-push!(LOAD_PATH, expanduser("/home/phelipe/Documentos"))
-using SimpleModels
-#using Trajectory
 using Plots
 using StaticArrays
 using DifferentialEquations
 pyplot()
-
 
 function simulation(kp::T, kv::T, Ts::Y, t0::Y, tend::Y, r1::Y , r2::Y) where {T<:AbstractMatrix, Y<: AbstractFloat}
 
@@ -53,19 +48,26 @@ function simulation(kp::T, kv::T, Ts::Y, t0::Y, tend::Y, r1::Y , r2::Y) where {T
     tspan = (t0,tend)
     prob2 = ODEProblem(myrobot,[0., 0., 0., 0.], tspan)
     sol2 = solve(prob2, Tsit5(), saveat = Ts,force_dtmin=true, maxiters = 1e10)
-#,reltol=1e-2,abstol=1e-3
+
     organize(2,sol2)
 end
 
-# NOTE: coloquei um número elevado de iterações para procurar não dar problema
+Ts = 0.08 # Intervalo entre leituras da saída
+tend = 20.0 # tempo de simulação
+t0 = 0.0 # instante inicial
+r1 =  0.6#0.6#1.6# referência junta 1
+r2 =  2.0#1.8#2.0# referência junta 2
 
-### Como utiliza a função ###
-#Ts = 0.08
-#tend = 2.0
-#t0 = 0.0
-#r1 = 1.2
-#r2 = 0.6
-#kp = SMatrix{2,2}(diagm([10., 30.]))
-#kv = SMatrix{2,2}(diagm([5., 3.]))
-#x, v, t, a, ta, j, tj = simulation(kp, kv, Ts, t0, tend, r1, r2);
-############
+
+kp_vec = [3500.,60.]
+kv_vec = [200.,35.]
+kp = SMatrix{2,2}(diagm(kp_vec))
+kv = SMatrix{2,2}(diagm(kv_vec))
+x, v, t, a, ta, j, tj = simulation(kp, kv, Ts, t0, tend, r1, r2)
+
+p1 = plot(t,x[1], label = "desejado 1")
+plot!([r1],seriestype= :hline, label = "referência")
+p2 = plot(t,x[2], label = "desejado 2")
+plot!([r2],seriestype= :hline, label = "referência")
+
+plot(p1,p2)

@@ -10,7 +10,7 @@ r= [0.091, 0.048]
 I= [1.266, 0.093]
 g = 9.81
 t0 = 0.
-tend = 3.
+tend = 4.
 Ts = 0.01
 
 function cinematica_direta(θ::T) where T<:AbstractArray
@@ -32,7 +32,8 @@ function cinematica_inversa(cord::Vector{T}) where T<:AbstractFloat
 end
 
 θ_start = [0.,0.]
-θ_end = [deg2rad(10),deg2rad(90)]
+#θ_end = [deg2rad(10),deg2rad(90)]
+θ_end = [1.8, 2.0]
 position_start = cinematica_direta(θ_start)
 position_end = cinematica_direta(θ_end)
 
