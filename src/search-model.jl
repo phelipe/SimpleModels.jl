@@ -52,8 +52,8 @@ function simulation(kp::T, kv::T, Ts::Y, t0::Y, tend::Y, r1::Y , r2::Y) where {T
 
     tspan = (t0,tend)
     prob2 = ODEProblem(myrobot,[0., 0., 0., 0.], tspan)
-    sol2 = solve(prob2, Tsit5(), saveat = Ts,force_dtmin=true, maxiters = 1e10)
-#,reltol=1e-2,abstol=1e-3
+    sol2 = solve(prob2, Tsit5(), saveat = Ts, maxiters = 1e7, force_dtmin=true,reltol=1e-2,abstol=1e-3)
+#,reltol=1e-2,abstol=1e-3,force_dtmin=true
     organize(2,sol2)
 end
 

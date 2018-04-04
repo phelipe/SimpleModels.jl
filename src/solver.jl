@@ -56,11 +56,11 @@ Ts = 0.08 # Intervalo entre leituras da saída
 tend = 20.0 # tempo de simulação
 t0 = 0.0 # instante inicial
 r1 =  0.6#0.6#1.6# referência junta 1
-r2 =  2.0#1.8#2.0# referência junta 2
+r2 =  2.2#1.8#2.0# referência junta 2
 
 
-kp_vec = [3500.,60.]
-kv_vec = [200.,35.]
+kp_vec = [280.,55.]
+kv_vec = [100.,25.]
 kp = SMatrix{2,2}(diagm(kp_vec))
 kv = SMatrix{2,2}(diagm(kv_vec))
 x, v, t, a, ta, j, tj = simulation(kp, kv, Ts, t0, tend, r1, r2)
@@ -69,5 +69,5 @@ p1 = plot(t,x[1], label = "desejado 1")
 plot!([r1],seriestype= :hline, label = "referência")
 p2 = plot(t,x[2], label = "desejado 2")
 plot!([r2],seriestype= :hline, label = "referência")
-
+println("posição final1 = $(x[1][end])| posição final2 = $(x[2][end])|")
 plot(p1,p2)
