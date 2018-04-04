@@ -11,7 +11,7 @@ pyplot()
 #model = dinamic(robot)
 
 Ts = 0.08
-tend = 2.0
+tend = 4.0
 t0 = 0.0
 x1,v1,a1,j1 = minimumjerkf(0.,0.,0.,t0,1.05,0.,0.,tend)
 x2,v2,a2,j2 = minimumjerkf(0.,0.,0.,t0,1.57,0.,0.,tend)
@@ -143,4 +143,4 @@ end
 
 
 #gui()
-#plotallv()
+plotallx()
