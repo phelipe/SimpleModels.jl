@@ -3,10 +3,10 @@ include("search-model.jl")
 using Evolutionary
 # Parâmetros da simulação
 Ts = 0.05 # Intervalo entre leituras da saída
-tend = 2.0 # tempo final para estabilização
+tend = 4.0 # tempo final para estabilização
 t0 = 0.0 # instante inicial
-r1 =  0.6#1.6# referência junta 1
-r2 =  0.8#2.0# referência junta 2
+r1 =  0.8#1.6# referência junta 1
+r2 =  1.6#2.0# referência junta 2
 
 
 function custo(x::Vector{Float64})
@@ -17,67 +17,114 @@ function custo(x::Vector{Float64})
     erro2 =  - (x[2] - r2)
     sizeVector = length(erro1)
 
-    # essa função custo leva em conta o erro inicial e final e o jerk, procurando assim minimizar a diferença entre a posição desejado e o erro inicial e minimizar o erro final bem como o jerk
-    out1 = sum( abs.( x[1][1:floor( Integer,sizeVector/3 )] ) ) / maximum( abs.( x[1] )[1:floor( Integer,sizeVector/3 )] ) +  sum( abs.( erro1[2*floor( Integer,sizeVector/3 ):end] ) ) / maximum( abs.( erro1 )[2*floor( Integer,sizeVector/3 ):end] ) + sum( abs.( j[1] ) ) / maximum( abs.(j[1]) )
+    theta_init_1 = sum(abs.(x[1][1:floor(Integer,sizeVector/3)]))# ./ (maximum(abs.(x[1][1:floor(Integer,sizeVector/3)])))
+    theta_init_2 = sum(abs.(x[2][1:floor(Integer,sizeVector/3)]))# ./ (maximum(abs.(x[2][1:floor(Integer,sizeVector/3)])))
 
-    out2 =  sum(abs.(x[2][1:floor(Integer,sizeVector/3)]))/maximum(abs.(x[2])[1:floor(Integer,sizeVector/3)]) + sum(abs.(erro2[2*floor(Integer,sizeVector/3):end]))/maximum(abs.(erro2)[2*floor(Integer,sizeVector/3):end])  + sum(abs.(j[2]))/maximum(abs.(j[2]))
+    erro_end_1 = sum(abs.(erro1[floor(Integer,sizeVector/3):end])) #./ maximum(abs.(erro1))
+    erro_end_2 = sum(abs.(erro2[floor(Integer,sizeVector/3):end])) #./ maximum(abs.(erro2))
 
-    # essa função custo é um somátorio do módulo das normas dos erros mais um somatório da norma dos trancos
-    #out = sum(abs.(erro1))/maximum(erro1) + sum(abs.(erro2))/maximum(erro2) + sum(abs.(j[1]))/maximum(j[1]) + sum(abs.(j[2]))/maximum(j[2])
+    jerk_1 = sum(abs.(j[1]))#/maximum(abs.(j[1]))
+    jerk_2 = sum(abs.(j[2]))#/maximum(abs.(j[2]))
 
-    # essa função custo leva em conta o erro inicial e final e o jerk, procurando assim minimizar a diferença entre a posição desejado e o erro inicial e minimizar o erro final bem como o jerk
-    erro_init_1 = sum(abs.(x[1][1:floor(Integer,size/3)]))/(maximum(abs.(x[1][1:floor(Integer,size/3)])))
-    erro_init_2 = sum(abs.(x[2][1:floor(Integer,size/3)]))/(maximum(abs.(x[2][1:floor(Integer,size/3)])))
-
-
-    erro_end_1 = sum(abs.(erro1[floor(Integer,size/3):end]))/maximum(abs.(erro1))
-    erro_end_2 = sum(abs.(erro2[floor(Integer,size/3):end]))/maximum(abs.(erro2))
-    # erro_end = sum(abs.(erro1[floor(Integer,size/3):end]))/r1 + sum(abs.(erro2[floor(Integer,size/3):end]))/r2
-
-    jerk_1 = sum(abs.(j[1]))/maximum(abs.(j[1]))
-    jerk_2 = sum(abs.(j[2]))/maximum(abs.(j[2]))
-
-    erro_init = erro_init_1 + erro_init_2
+    theta_init = theta_init_1 + theta_init_2
     erro_end = erro_end_1 + erro_end_2
     jerk = jerk_1 + jerk_2
-    println("$(erro_init) + $(erro_end) + $(jerk)")
-    out =  erro_init + erro_end + jerk
 
-    # out = sum(abs.(erro1))/maximum(erro1) + sum(abs.(erro2))/maximum(erro2) + sum(abs.(j[1]))/maximum(j[1]) + sum(abs.(j[2]))/maximum(j[2])
+    erro_end = erro_end*10.
+    jerk = jerk*0.01
 
-    # out = sum(abs.(erro1[1:floor(Integer,sizeVector/3)] - r1))/(abs(maximum(erro1)- r1)) + sum(abs.(erro2[1:floor(Integer,sizeVector/3)] - r2))/(abs(maximum(erro2)- r2)) +  sum(abs.(erro1[2*floor(Integer,sizeVector/3):end]))/maximum(erro1) + sum(abs.(erro2[2*floor(Integer,sizeVector/3):end]))/maximum(erro2) + sum(abs.(j[1]))/maximum(j[1]) + sum(abs.(j[2]))/maximum(j[2])
-
-    # essa função é a mesma da anterio porém considerando metade metado como valores de erro inicial e final
-    # out = sum(abs.(erro1[1:floor(Integer,sizeVector/2)] - r1))/(abs(maximum(erro1)- r1)) + sum(abs.(erro2[1:floor(Integer,sizeVector/2)] - r2))/(abs(maximum(erro2)- r2)) +  sum(abs.(erro1[2*floor(Integer,sizeVector/2):end]))/maximum(erro1) + sum(abs.(erro2[2*floor(Integer,sizeVector/2):end]))/maximum(erro2) + sum(abs.(j[1]))/maximum(j[1]) + sum(abs.(j[2]))/maximum(j[2])
-    out = out1 + out2
-#    println("out1 = $(out1) out2 = $(out2) e saída $(out)")
-    (1/out)*10
+    #out =  0.1*theta_init + 0.7*erro_end + 0.2*jerk
+    out =  erro_end + jerk
+    #out =  theta_init + erro_end + jerk
+    println("$(theta_init) | $(erro_end) | $(jerk) | $(out)")
+    out
 end
 
+
+#------------------------------------------------------------
+#posição 1 final: 0.793393033421819, posição 2 final 1.6055446740193777
+#erro 1 final: -0.37855130031376544 graus, posição 2 final 0.3176864200861771 graus
+#erro 1% = 0.8258708222726313%, erro 2% = -0.34654212621110236%
+#Total jerk 1 = 3473.886628717687, Total jerk 2 = 4516.915125805537
+#Max jerk 1 = 2731.6938379833528, Max jerk 2 = 3755.223596826475
+
+
+function gerador(n)
+    a = 6.
+    out = rand(n)
+    if a == 1
+        out = rand(n).*[1000., 1000., 100., 100.]
+    elseif a == 2
+        out = rand(n).*[100., 100., 100., 100.]
+    elseif a == 3
+        out = rand(n).*[10., 10., 10., 10.]
+    elseif a == 4
+        out = rand(n).*[10000., 100., 100., 100.]
+    elseif a == 5
+        out = rand(n).*[1000., 100., 1000., 100.]
+    elseif a == 6
+        out = rand(n).*[10000., 100., 1000., 100.]
+    else
+        out = rand(n).*[1000., 1000., 1000., 1000.]
+    end
+    out
+end
+
+function gerador2(n)
+    a = rand()*10
+    out = rand(n)
+    if a <= 1
+        out = rand(n).*[1000., 1000., 100., 100.]
+    elseif a <= 2
+        out = rand(n).*[100., 100., 100., 100.]
+    elseif a <= 3
+        out = rand(n).*[10., 10., 10., 10.]
+    elseif a <= 4
+        out = rand(n).*[10000., 100., 100., 100.]
+    elseif a <= 5
+        out = rand(n).*[1000., 100., 1000., 100.]
+    elseif a <= 6
+        out = rand(n).*[10000., 100., 1000., 100.]
+    else
+        out = rand(n).*[1000., 1000., 1000., 1000.]
+    end
+    out
+end
 
 #### Para algoritmo genético
 # N : número de parâmetros do vetor de entrada
 # ɛ : Quantidade de indivíduos da geração atual que terão sobrevivência garantida na próxima geração
 println("Iniciando algoritmo genético")
 N = 4
-println("iniciando")
-result, fitness, cnt = ga(custo, N; initPopulation = (n -> rand(n).*[1000., 100., 1000., 100.]), populationSize = 50, ɛ = 0.1, selection = sus, crossover = intermediate(0.25), mutation = domainrange(fill(0.5,N)), iterations = 50)
+result, fitness, cnt = ga(custo, N; initPopulation = gerador, populationSize = 50, ɛ = 0.1, selection = sus, crossover = intermediate(0.25), mutation = domainrange(fill(0.5,N)), iterations = 50)
 
-t_end_new = tend + 3.
+t_end_new = tend 
 kp = SMatrix{2,2}(diagm(result[1:2]))
 kv = SMatrix{2,2}(diagm(result[3:4]))
 
 x, v, t, a, ta, j, tj = simulation(kp, kv, Ts, t0, t_end_new, r1, r2);
 
-p1 = plot(t,x[1], label = "desejado 1")
-p1= plot!([r1],seriestype= :hline, label = "referência");
-p2 = plot(t,x[2], label = "desejado 2")
-p2 = plot!([r2],seriestype= :hline, label = "referência");
+
 println("------------------------------------------------------------")
 println("O resultado foi $(result) com $(cnt) iterações e $(fitness)")
-println("posição 1 final: $(x[1][end]), posição 2 final $(x[2][end])")
-println("erro 1 final: $(rad2deg(x[1][end] - r1)) graus, posição 2 final $(rad2deg(x[2][end] - r2)) graus")
+println("posição 1 final: $(rad2deg(x[1][end])) graus, posição 2 final $(rad2deg(x[2][end])) graus")
+println("erro 1 final: $(rad2deg(x[1][end] - r1)) graus, erro 2 final $(rad2deg(x[2][end] - r2)) graus")
 println("erro 1% = $(((r1 - x[1][end])/r1)*100)%, erro 2% = $(((r2 - x[2][end])/r2)*100)%")
-plot(p1,p2)
+println("Total jerk 1 = $(sum(abs.(j[1]))), Total jerk 2 = $(sum(abs.(j[2])))")
+println("Max jerk 1 = $(maximum(abs.(j[1]))), Max jerk 2 = $(maximum(abs.(j[2])))")
 
-# BUG: Encontre um problema, quando ocorre um erro na integração eu mando o vetor incompleto para o lado de fora e ele usa esses valores no cálculo do fitness. Devo corrigir isso!!!
+function plotx()
+    p1 = plot(t,x[1], label = "desejado 1")
+    p1= plot!([r1],seriestype= :hline, label = "referência");
+    p2 = plot(t,x[2], label = "desejado 2")
+    p2 = plot!([r2],seriestype= :hline, label = "referência");
+    plot(p1,p2)
+end
+
+function plotj()
+    p1 = plot(tj,j[1], label = "jerk 1")
+    p2 = plot(tj,j[2], label = "jerk 2")
+    plot(p1,p2)
+end
+
+plotx()
