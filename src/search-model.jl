@@ -1,5 +1,5 @@
 #Arquivo contendo  a função que será usada para rodar a simulação e retornar os melhores valores
-push!(LOAD_PATH, expanduser("/home/phelipe/Documentos"))
+push!(LOAD_PATH, expanduser("/home/phelipe/Documentos/programas"))
 using SimpleModels
 #using Trajectory
 using Plots
