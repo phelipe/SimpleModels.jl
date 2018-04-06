@@ -48,29 +48,29 @@ end
 #Total jerk 1 = 3473.886628717687, Total jerk 2 = 4516.915125805537
 #Max jerk 1 = 2731.6938379833528, Max jerk 2 = 3755.223596826475
 
-
-function gerador(n)
-    a = 6.
-    out = rand(n)
-    if a == 1
-        out = rand(n).*[1000., 1000., 100., 100.]
-    elseif a == 2
-        out = rand(n).*[100., 100., 100., 100.]
-    elseif a == 3
-        out = rand(n).*[10., 10., 10., 10.]
-    elseif a == 4
-        out = rand(n).*[10000., 100., 100., 100.]
-    elseif a == 5
-        out = rand(n).*[1000., 100., 1000., 100.]
-    elseif a == 6
-        out = rand(n).*[10000., 100., 1000., 100.]
-    else
-        out = rand(n).*[1000., 1000., 1000., 1000.]
-    end
-    out
+function gerador1(n)
+    out = rand(n).*[1000., 1000., 100., 100.]
+end
+function gerador2(n)
+    out = rand(n).*[100., 100., 100., 100.]
+end
+function gerador3(n)
+    out = rand(n).*[10., 10., 10., 10.]
+end
+function gerador4(n)
+    out = rand(n).*[10000., 100., 100., 100.]
+end
+function gerador5(n)
+    out = rand(n).*[1000., 100., 1000., 100.]
+end
+function gerador6(n)
+    out = rand(n).*[10000., 100., 1000., 100.]
+end
+function gerador7(n)
+    out = rand(n).*[1000., 1000., 1000., 1000.]
 end
 
-function gerador2(n)
+function geradorMix(n)
     a = rand()*10
     out = rand(n)
     if a <= 1
@@ -96,7 +96,7 @@ end
 # ɛ : Quantidade de indivíduos da geração atual que terão sobrevivência garantida na próxima geração
 println("Iniciando algoritmo genético")
 N = 4
-result, fitness, cnt = ga(custo, N; initPopulation = gerador, populationSize = 50, ɛ = 0.1, selection = sus, crossover = intermediate(0.25), mutation = domainrange(fill(0.5,N)), iterations = 50)
+result, fitness, cnt = ga(custo, N; initPopulation = gerador6, populationSize = 50, ɛ = 0.1, selection = sus, crossover = intermediate(0.25), mutation = domainrange(fill(0.5,N)), iterations = 50)
 
 t_end_new = tend
 kp = SMatrix{2,2}(diagm(result[1:2]))
