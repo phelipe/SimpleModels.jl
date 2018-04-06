@@ -3,7 +3,7 @@ include("search-model.jl")
 using Evolutionary
 # Parâmetros da simulação
 Ts = 0.05 # Intervalo entre leituras da saída
-tend = 4.0 # tempo final para estabilização
+tend = 2. # tempo final para estabilização
 t0 = 0.0 # instante inicial
 r1 =  0.8#1.6# referência junta 1
 r2 =  1.6#2.0# referência junta 2
@@ -98,7 +98,7 @@ println("Iniciando algoritmo genético")
 N = 4
 result, fitness, cnt = ga(custo, N; initPopulation = gerador, populationSize = 50, ɛ = 0.1, selection = sus, crossover = intermediate(0.25), mutation = domainrange(fill(0.5,N)), iterations = 50)
 
-t_end_new = tend 
+t_end_new = tend
 kp = SMatrix{2,2}(diagm(result[1:2]))
 kv = SMatrix{2,2}(diagm(result[3:4]))
 
